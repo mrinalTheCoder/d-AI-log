@@ -8,10 +8,9 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import axios from 'axios';
+import axios from "axios";
 
 const API_KEY = process.env.REACT_APP_API_KEY;
-
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -22,29 +21,32 @@ function App() {
   const callPaLMapi = async () => {
     const requestData = {
       prompt: {
-        context: 'Write a caption for the image at the given url.',
+        context:
+          "You are a writer at a movie studio. I will give you a storyboard and you will help me complete the next two lines of dialog.",
         examples: [],
-        messages: [{ content: imageUrl }]
+        messages: [
+          {
+            content: `Storyboard: ${imageUrl}\n${dialogText}:`,
+          },
+        ],
       },
-      temperature: 0.25,
+      temperature: 0.9,
       top_k: 40,
       top_p: 0.95,
       candidate_count: 1,
     };
 
     const headers = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
-    console.log(API_KEY);
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=${API_KEY}`,
       requestData,
-      { headers }
+      { headers },
     );
     setDialogText(response.data.candidates[0].content);
-  }
-
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -56,8 +58,6 @@ function App() {
 
   const handleAddImage = () => {
     setImages([...images, imageUrl]);
-    setImageUrl("");
-    callPaLMapi();
     handleClose();
   };
 
@@ -65,6 +65,9 @@ function App() {
     <div>
       <Button variant="contained" color="primary" onClick={handleClickOpen}>
         Add Image
+      </Button>
+      <Button variant="contained" color="primary" onClick={callPaLMapi}>
+        Generate Dialog!
       </Button>
 
       <Grid container spacing={2}>
