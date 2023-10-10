@@ -8,12 +8,43 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
+import axios from 'axios';
+
+const API_KEY = process.env.REACT_APP_API_KEY;
+
 
 function App() {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState([]);
   const [imageUrl, setImageUrl] = useState("");
   const [dialogText, setDialogText] = useState("");
+
+  const callPaLMapi = async () => {
+    const requestData = {
+      prompt: {
+        context: 'Write a caption for the image at the given url.',
+        examples: [],
+        messages: [{ content: imageUrl }]
+      },
+      temperature: 0.25,
+      top_k: 40,
+      top_p: 0.95,
+      candidate_count: 1,
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    console.log(API_KEY);
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=${API_KEY}`,
+      requestData,
+      { headers }
+    );
+    setDialogText(response.data.candidates[0].content);
+  }
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -26,6 +57,7 @@ function App() {
   const handleAddImage = () => {
     setImages([...images, imageUrl]);
     setImageUrl("");
+    callPaLMapi();
     handleClose();
   };
 
